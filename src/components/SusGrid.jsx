@@ -148,7 +148,7 @@ const SudokuGrid = () => {
 
     const handleCheckSolution = () => {
         const result = checkSolution(board);
-        setCheckResult(result ? 'Congratulations! Your solution is correct!' : 'Oops! The solution is incorrect.');
+        setCheckResult(result ? 'Congratulations! Your solution is correct !' : 'Oops! The solution is incorrect.');
     };
 
     const getBackgroundColor = (rowIndex, colIndex) => {
@@ -238,7 +238,7 @@ const SudokuGrid = () => {
                 </Button>
             </div>
             {checkResult && (
-                <Typography variant="h6" align="center" sx={{ marginTop: '20px', color: checkResult.includes('correct') ? 'green' : 'red' }}>
+                <Typography variant="h6" align="center" sx={{ marginTop: '20px', color: checkResult.includes('Your') ? 'green' : 'red' }}>
                     {checkResult}
                 </Typography>
             )}
