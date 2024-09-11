@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { TextField, Button, Typography, FormControlLabel, Checkbox } from '@mui/material';
+import { TextField, Button, Typography, FormControlLabel, Checkbox, MenuItem, Select, InputLabel, FormControl } from '@mui/material';
 import '../assets/SudokuGrid.css';
 
+// Shuffle array function for randomness in generation
 const shuffleArray = (array) => {
     for (let i = array.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
@@ -32,7 +33,7 @@ const fillBoardWithSteps = async (board, setBoard, setSolvedCells) => {
     for (let row = 0; row < 9; row++) {
         for (let col = 0; col < 9; col++) {
             if (board[row][col] === 0) {
-                let numbers = shuffleArray([1, 2, 3, 4, 5, 6, 7, 8, 9]); 
+                let numbers = shuffleArray([1, 2, 3, 4, 5, 6, 7, 8, 9]); // Randomized numbers
                 for (let num of numbers) {
                     if (isValidPlacement(board, row, col, num)) {
                         board[row][col] = num;
@@ -42,7 +43,7 @@ const fillBoardWithSteps = async (board, setBoard, setSolvedCells) => {
                         if (await fillBoardWithSteps(board, setBoard, setSolvedCells)) {
                             return true;
                         }
-                        board[row][col] = 0; 
+                        board[row][col] = 0; // Backtrack
                         setBoard([...board]);
                     }
                 }
@@ -57,14 +58,14 @@ const fillBoardBacktracking = (board) => {
     for (let row = 0; row < 9; row++) {
         for (let col = 0; col < 9; col++) {
             if (board[row][col] === 0) {
-                let numbers = shuffleArray([1, 2, 3, 4, 5, 6, 7, 8, 9]);
+                let numbers = shuffleArray([1, 2, 3, 4, 5, 6, 7, 8, 9]); // Randomized numbers
                 for (let num of numbers) {
                     if (isValidPlacement(board, row, col, num)) {
                         board[row][col] = num;
                         if (fillBoardBacktracking(board)) {
                             return true;
                         }
-                        board[row][col] = 0; 
+                        board[row][col] = 0; // Backtrack
                     }
                 }
                 return false;
@@ -74,16 +75,16 @@ const fillBoardBacktracking = (board) => {
     return true;
 };
 
-const generateSudoku = () => {
+const generateSudoku = (difficulty) => {
     const fullBoard = Array(9).fill().map(() => Array(9).fill(0));
-    fillBoardBacktracking(fullBoard); 
+    fillBoardBacktracking(fullBoard); // Randomized board generation
 
     const puzzleBoard = fullBoard.map(row => [...row]);
 
-    const difficulty = 70; 
+    const cellsToRemove = difficulty === 'Easy' ? 40 : difficulty === 'Medium' ? 50 : 70; // Adjust difficulty level
     let count = 0;
 
-    while (count < difficulty) {
+    while (count < cellsToRemove) {
         const row = Math.floor(Math.random() * 9);
         const col = Math.floor(Math.random() * 9);
 
@@ -96,20 +97,63 @@ const generateSudoku = () => {
     return puzzleBoard;
 };
 
+const checkSolution = (board) => {
+    // Ensure every cell is filled
+    for (let row = 0; row < 9; row++) {
+        for (let col = 0; col < 9; col++) {
+            if (board[row][col] === 0) return false; // Invalid if any cell is empty
+        }
+    }
+
+    // Check rows, columns, and 3x3 subgrids
+    for (let i = 0; i < 9; i++) {
+        const row = new Set();
+        const col = new Set();
+        const subGrid = new Set();
+
+        for (let j = 0; j < 9; j++) {
+            if (row.has(board[i][j])) return false;
+            row.add(board[i][j]);
+
+            if (col.has(board[j][i])) return false;
+            col.add(board[j][i]);
+
+            const subRow = 3 * Math.floor(i / 3) + Math.floor(j / 3);
+            const subCol = 3 * Math.floor(i % 3) + (j % 3);
+            if (subGrid.has(board[subRow][subCol])) return false;
+            subGrid.add(board[subRow][subCol]);
+        }
+    }
+    return true;
+};
+
 const SudokuGrid = () => {
-    const [board, setBoard] = useState(generateSudoku());
+    const [board, setBoard] = useState(generateSudoku('Medium'));
     const [solvedCells, setSolvedCells] = useState([]);
-    const [manualMode, setManualMode] = useState(false); 
+    const [manualMode, setManualMode] = useState(false); // State to enable/disable manual input mode
+    const [difficulty, setDifficulty] = useState('Medium'); // State to manage difficulty
+    const [checkResult, setCheckResult] = useState(null); // State to manage check result
 
     const handleSolve = async () => {
         const newBoard = [...board.map(row => [...row])];
         setSolvedCells([]);
-        await fillBoardWithSteps(newBoard, setBoard, setSolvedCells); 
+        await fillBoardWithSteps(newBoard, setBoard, setSolvedCells); // Visual Backtracking
     };
 
     const handleNewGame = () => {
         setSolvedCells([]);
-        setBoard(generateSudoku());
+        setBoard(generateSudoku(difficulty));
+        setCheckResult(null); // Reset check result
+    };
+
+    const handleCheckSolution = () => {
+        const result = checkSolution(board);
+        setCheckResult(result ? 'Congratulations! Your solution is correct!' : 'Oops! The solution is incorrect.');
+    };
+
+    const getBackgroundColor = (rowIndex, colIndex) => {
+        const isGrey = (Math.floor(rowIndex / 3) + Math.floor(colIndex / 3)) % 2 === 0;
+        return isGrey ? '#f0f0f0' : 'white';
     };
 
     const renderBoard = () =>
@@ -133,7 +177,7 @@ const SudokuGrid = () => {
                                 }
                             }}
                             sx={{
-                                backgroundColor: isSolvedCell ? '#c8e6c9' : 'white',
+                                backgroundColor: isSolvedCell ? '#c8e6c9' : getBackgroundColor(rowIndex, colIndex),
                                 '& input': {
                                     color: isSolvedCell ? 'green' : 'black',
                                     fontWeight: isSolvedCell ? 'bold' : 'normal',
@@ -150,6 +194,21 @@ const SudokuGrid = () => {
             <Typography variant="h4" align="center" gutterBottom sx={{ fontWeight: 'bold', marginBottom: '20px', color: 'black' }}>
                 Sudoku Solver
             </Typography>
+
+            {/* Difficulty Selector */}
+            <FormControl variant="outlined" sx={{ marginBottom: '20px' }}>
+                <InputLabel id="difficulty-label">Difficulty</InputLabel>
+                <Select
+                    labelId="difficulty-label"
+                    value={difficulty}
+                    onChange={e => setDifficulty(e.target.value)}
+                    label="Difficulty"
+                >
+                    <MenuItem value="Easy">Easy</MenuItem>
+                    <MenuItem value="Medium">Medium</MenuItem>
+                    <MenuItem value="Hard">Hard</MenuItem>
+                </Select>
+            </FormControl>
 
             <FormControlLabel
                 control={
@@ -174,7 +233,15 @@ const SudokuGrid = () => {
                 <Button variant="contained" color="secondary" onClick={handleNewGame}>
                     New Game
                 </Button>
+                <Button variant="contained" color="success" onClick={handleCheckSolution}>
+                    Check Solution
+                </Button>
             </div>
+            {checkResult && (
+                <Typography variant="h6" align="center" sx={{ marginTop: '20px', color: checkResult.includes('correct') ? 'green' : 'red' }}>
+                    {checkResult}
+                </Typography>
+            )}
         </div>
     );
 };
