@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { TextField, Button, Typography, FormControlLabel, Checkbox, MenuItem, Select, InputLabel, FormControl } from '@mui/material';
+import { TextField, Button, Typography, FormControlLabel, Checkbox, MenuItem, Select, InputLabel, FormControl, Box } from '@mui/material';
 import '../assets/SudokuGrid.css';
 
 // Shuffle array function for randomness in generation
@@ -242,6 +242,29 @@ const SudokuGrid = () => {
                     {checkResult}
                 </Typography>
             )}
+            {/* show my github - https://github.com/crizmo/sudoku-solver with github logo also text sayuing to star and fork it */}
+            <Box
+                sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    marginTop: '20px',
+                    color: 'black',
+                    '& img': {
+                        marginRight: '5px',
+                    },
+                }}
+            >
+                <img src="https://img.icons8.com/ios-glyphs/30/000000/github.png" alt="GitHub" />
+                <Typography variant="body1">
+                    Star the repo if you like it! Fork it to create your own version!
+                    <a href="https://github.com/crizmo/sudoku-solver" target="_blank" rel="noreferrer"
+                        style={{ color: 'blue', textDecoration: 'none', fontWeight: 'bold' }}
+                    >
+                        GitHub
+                    </a>
+                </Typography>
+            </Box>
         </div>
     );
 };
