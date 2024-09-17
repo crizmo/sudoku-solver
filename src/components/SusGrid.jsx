@@ -143,7 +143,7 @@ const SudokuGrid = () => {
     const handleNewGame = () => {
         setSolvedCells([]);
         setBoard(generateSudoku(difficulty));
-        setCheckResult(null); // Reset check result
+        setCheckResult(null);
     };
 
     const handleCheckSolution = () => {
@@ -242,7 +242,6 @@ const SudokuGrid = () => {
                     {checkResult}
                 </Typography>
             )}
-            {/* show my github - https://github.com/crizmo/sudoku-solver with github logo also text sayuing to star and fork it */}
             <Box
                 sx={{
                     display: 'flex',
